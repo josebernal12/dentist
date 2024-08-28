@@ -24,6 +24,8 @@ export class CreateAuthDto {
     @IsNotEmpty()
     confirmPassword: string;
 
+    version:string;
+
     companyId:string
 
 }

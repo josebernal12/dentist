@@ -3,23 +3,29 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-import { CompanyRepository } from './repository/company.repository';
-import { AuthRepository } from 'src/auth/repository/auth.repository';
 import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from 'src/user/repository';
+import { CompanyRepository } from './repository';
+import { CreateCompanyDto, UpdateCompanyDto } from './dto';
 
 @Injectable()
 export class CompanyService {
   constructor(
     private readonly companyRepository: CompanyRepository,
-    private readonly authRepository: AuthRepository,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
   async create(createCompanyDto: CreateCompanyDto, userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new BadRequestException('user with that id not exist');
+    if (user.companyId)
+      throw new BadRequestException('company already exist with that user');
+    const existEmail = await this.companyRepository.findOne(
+      createCompanyDto.email,
+    );
+    if (existEmail) throw new BadRequestException('email already exist');
     const company = await this.companyRepository.create(createCompanyDto);
     if (!company) throw new NotFoundException('error creating company');
-    const user = await this.authRepository.findById(userId);
     if (!user) throw new NotFoundException('error getting user');
     user.companyId = company._id;
     await user.save();

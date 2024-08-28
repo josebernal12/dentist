@@ -20,5 +20,4 @@ export class CreateCompanyDto {
   @IsString()
   @IsNotEmpty()
   country: string;
-
 }

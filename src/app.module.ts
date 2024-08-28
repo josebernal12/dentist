@@ -6,8 +6,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { CompanyModule } from './company/company.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { CommonModule } from './common/common.module';
-
+import { UserModule } from './user/user.module';
+import { BusinessModule } from './business/business.module';
+//TODO AGREGAR CUENTAS SUSPENDIDAS
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,13 +22,14 @@ import { CommonModule } from './common/common.module';
     MongooseModule.forRoot(process.env.DATABASE_URL),
     AuthModule,
     CompanyModule,
-    CommonModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
         limit: 10,
       },
     ]),
+    UserModule,
+    BusinessModule,
   ],
   providers: [
     {

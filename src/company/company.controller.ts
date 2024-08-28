@@ -7,26 +7,27 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
+  SetMetadata,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
 import { ParseMongoIdPipe } from 'src/common/pipes/parse-mongoId.pipe';
-import { JwtAuthGuard } from 'src/auth/passport/jwt-auth.guard';
-import { RequestWithUser } from 'src/common/interfaces/request-with-user.interface';
+import { CreateCompanyDto, UpdateCompanyDto } from './dto';
+import { SkipCheckAccountSuspendedGuard } from 'src/common/guard';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+  ) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Post()
+  @UseGuards(SkipCheckAccountSuspendedGuard)
+  @SetMetadata('skipCheckAccountSuspended',true)
+  @Post('/:id')
   create(
     @Body() createCompanyDto: CreateCompanyDto,
-    @Request() req: RequestWithUser,
+    @Param('id', ParseMongoIdPipe) userId: string,
   ) {
-    return this.companyService.create(createCompanyDto,req.user.userId);
+    return this.companyService.create(createCompanyDto, userId);
   }
 
   @Get()
